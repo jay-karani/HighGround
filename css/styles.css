@@ -1,0 +1,77 @@
+/* 1. TOKENS: The only colors, sizes, and fonts that should be used in the app. */
+:root {
+    --bg: #F9FAF9;          /* very light grey-green page color */
+    --surface: #FFFFFF;     /* cards and boxes main */
+    --surface-2: #e5eceb;   /* boxes inside cards */
+    --ink: #152c2e;         /* main text color */
+    --ink-2: #3c5153;       /* secondary text color */
+    --muted: #5e7174;       /* muted text color */
+    --line: #d3ddda;        /* borders for elements */
+
+    --brand: #0e4b4e;       /* deep teal: buttons and links */
+    --brand-2: #186a6e;     /* lighter teal: hover over button */
+    --on-brand: #ffffff;    /* teal button text color */
+    --accent: #dba125;      /* gold: pin of the house */
+    --bad: #b63b3b;         /* red: issue or problem */
+    --bad-soft: #f7ddda;    /* light red: background of problem box */
+    --map-line: #ffffff;    /* outlines drawn for map */
+
+    /* Text sizes (16px = 1rem). Normal body text uses --fs-md. */
+    --fs-xs: .875rem;   /* 14px: mini fine print */
+    --fs-sm: 1rem;      /* 16px: labels and buttons */
+    --fs-md: 1.125rem;  /* 18px: main body text */
+    --fs-lg: 1.3125rem; /* 21px: large intro text */
+    --fs-xl: 1.625rem;  /* 26px: section headings */
+    --fs-2xl: clamp(2rem, 4.6vw, 2.75rem); /* big page title */
+
+    /* Corner rounding radius sizes */
+    --radius: 10px;
+    --radius-sm: 6px;
+    --font: "Atkinson Hyperlegible", "Segoe UI", system-ui, sans-serif;
+}
+
+/* 2. BASE + LAYOUT */
+*, *::before, *::after { box-sizing: border-box; }
+
+body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--font);
+    font-size: var(--fs-md);
+    line-height: 1.6;
+}
+h1, h2, h3 { line-height: 1.2; margin: 0 0 .5em; font-weight: 700; }
+h1 { font-size: var(--fs-2xl); }
+h2 { font-size: var(--fs-xl); }
+h3 { font-size: var(--fs-lg); }
+p { margin: 0 0 1em; }
+a { color: var(--brand-2); }
+
+.wrap { width: min(1040px, 100% - 32px); margin-inline: auto; }
+.muted { color: var(--muted); }
+.small { font-size: var(--fs-sm); }
+[hidden] { display: none !important; }
+
+/* Header */
+.site-header { background: var(--surface); border-bottom: 1px solid var(--line); }
+.header-row { display: flex; align-items: center; gap: 20px; height: 64px; }
+.brand { font-weight: 700; font-size: var(--fs-lg); color: var(--ink); text-decoration: none; }
+
+/* Hero */
+.hero { padding: 64px 0 40px; }
+.hero-inner { max-width: 720px; }
+.lede { font-size: var(--fs-lg); color: var(--ink-2); max-width: 640px; }
+
+/* Footer */
+.site-footer { border-top: 1px solid var(--line); padding: 28px 0 40px; margin-top: 40px; }
+
+/* 3. MAP */
+.map {
+    height: 420px;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-sm);
+    background: var(--surface-2);
+    overflow: hidden;
+    margin: 12px 0 8px;
+}
