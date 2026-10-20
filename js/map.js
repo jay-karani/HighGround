@@ -23,3 +23,18 @@ HG.map.init = function (elementId) {
         leafletMap.scrollWheelZoom.enable();
     });
 };
+
+// Remove the old pin before new search
+HG.map.clear = function () {
+    if (!leafletMap) return;
+    pinLayer.clearLayers();
+};
+
+// Put a pin at said spot, label it, and zoom in
+HG.map.showPin = function (lat, lon, label) {
+    if (!leafletMap) return;
+    L.circleMarker([lat, lon], { radius: 6, className: "pin" })
+        .bindTooltip(label)
+        .addTo(pinLayer);
+    leafletMap.setView([lat, lon], 18);
+};
