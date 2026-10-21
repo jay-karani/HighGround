@@ -25,6 +25,8 @@ async function run(address) {
     state.busy = true;
     document.getElementById("search-btn").disabled = true;
     document.getElementById("error-card").hidden = true;
+    HG.map.showZone(null);
+    document.getElementById("zone-summary").textContent = "";
 
     try {
         // Nominatim rule: max one request per second.
@@ -40,6 +42,23 @@ async function run(address) {
 
         HG.map.clear();
         HG.map.showPin(geo.lat, geo.lon, geo.matchedAddress);
+
+        // Creates an object r with search results
+        const r = { geo: geo, zone: null };
+
+        // Ask FEMA which flood zone the pin lands in
+        const zoneSummary = document.getElementById("zone-summary");
+        zoneSummary.textContent = "Reading FEMA's flood map for this spot...";
+        try {
+            r.zone = await getFloodZone(geo.lon, geo.lat);
+            HG.map.showZone(r.zone.polygon);
+            const words = describeZone(r.zone);
+            zoneSummary.textContent = `${words.title}. ${words.text}`;
+        } catch (err) {
+            console.error(err);
+            zoneSummary.textContent = "FEMA's flood map didn't answer. It may be busy or down, so try again in a minute.";
+        }
+
     } catch (err) {
         console.error(err); // print the real error in the Console (F12)
         showError("<p><b>Something went wrong reaching the address service.</b> Check your internet connection and try again.</p>");

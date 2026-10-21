@@ -15,6 +15,7 @@
     --bad: #b63b3b;         /* red: issue or problem */
     --bad-soft: #f7ddda;    /* light red: background of problem box */
     --map-line: #ffffff;    /* outlines drawn for map */
+    --water: #2f8daf;       /* flood zone blue water */
 
     /* Text sizes (16px = 1rem). Normal body text uses --fs-md. */
     --fs-xs: .875rem;   /* 14px: mini fine print */
@@ -28,6 +29,20 @@
     --radius: 10px;
     --radius-sm: 6px;
     --font: "Atkinson Hyperlegible", "Segoe UI", system-ui, sans-serif;
+
+    /* FEMA's flood zone on map */
+    .zone-poly {
+        fill: var(--water);
+        fill-opacity: 0.22;
+        stroke: var(--water);
+        stroke-width: 2;
+        stroke-dasharray: 6 4;
+    }
+
+    .zone-summary {
+        margin: 12px 0 0;
+        font-size: var(--fs-md);
+    }
 }
 
 /* 2. BASE + LAYOUT */

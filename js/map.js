@@ -38,3 +38,21 @@ HG.map.showPin = function (lat, lon, label) {
         .addTo(pinLayer);
     leafletMap.setView([lat, lon], 18);
 };
+
+// Flood zone shape
+let zoneLayer = null; // initial flood zone shape on map
+
+// Shade in FEMA's flood zone on map, HG.map.showZone(null) removes the old one.
+HG.map.showZone = function (rings) {
+    if (!leafletMap) return;
+    if (zoneLayer) {
+        zoneLayer.remove();
+        zoneLayer = null;
+    }
+    if (!rings) return;
+
+    // FEMA gives [longitude, latitude], Leaflet needs [latitude, longitude]
+    const latLngRings = rings.map((ring) => ring.map(([lon, lat]) => [lat, lon]));
+    zoneLayer = L.polygon(latLngRings, { className: "zone-poly", interactive: false }).addTo(leafletMap);
+    zoneLayer.bringToBack(); // keep pin on top
+};
