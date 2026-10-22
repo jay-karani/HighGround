@@ -135,3 +135,12 @@ a { color: var(--brand-2); }
     .hero { padding: 36px 0 28px; }
     .search { flex-direction: column; }
 }
+
+
+/* House outline on map */
+.leaflet-interactive.footprint-poly {
+  fill: var(--accent);
+  fill-opacity: 0.25;
+  stroke: var(--accent);
+  stroke-width: 2.5;
+}

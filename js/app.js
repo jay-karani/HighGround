@@ -46,6 +46,27 @@ async function run(address) {
         // Creates an object r with search results
         const r = { geo: geo, zone: null };
 
+        // House outline
+        let footprint = null;
+        try {
+            footprint = await getFootprint(geo.lon, geo.lat);
+        } catch (err) {
+            console.error(err);
+        }
+
+        if (footprint === null) {
+            const radius = HG.config.sampling.fallbackRadiusMeters;
+            footprint = {
+                ring: circleRing(geo.lon, geo.lat, radius),
+                source: "Estimated circle (no building outline found)",
+                note: `We measured a ${radius} m circle around the pin instead.`,
+                estimated: true,
+            };
+        }
+        r.footprint = footprint;
+        HG.map.showFootprint(footprint.ring);
+
+
         // Ask FEMA which flood zone the pin lands in
         const zoneSummary = document.getElementById("zone-summary");
         zoneSummary.textContent = "Reading FEMA's flood map for this spot...";

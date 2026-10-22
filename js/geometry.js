@@ -40,3 +40,37 @@ function distanceToPolyline(p, line) {
     return bestGuess;
 }
 
+
+// Walking around house outline
+
+// Drop the repeated last corner of the shape meant to signify completion from map server
+function openRing(ring) {
+  const first = ring[0];
+  const last = ring[ring.length - 1];
+  if (first[0] === last[0] && first[1] === last[1]) {
+    return ring.slice(0, -1);
+  }
+  return ring.slice();
+}
+
+// Average the corners to estimate the center of a shape
+function centroid(ring) {
+  let sumX = 0;
+  let sumY = 0;
+  ring.forEach(([x, y]) => {
+    sumX += x;
+    sumY += y;
+  });
+  return [sumX / ring.length, sumY / ring.length];
+}
+
+// Make a circle of corners around the pin if no outline found
+function circleRing(lon, lat, radiusMeters) {
+  const projection = makeProjection(lat, lon);
+  const ring = [];
+  for (let i = 0; i < 24; i++) {
+    const angle = (2 * Math.PI * i) / 24;
+    ring.push(projection.toLonLat([Math.cos(angle) * radiusMeters, Math.sin(angle) * radiusMeters]));
+  }
+  return ring;
+}

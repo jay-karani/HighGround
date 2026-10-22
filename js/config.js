@@ -18,4 +18,13 @@ HG.config = {
             attribution: "&copy; OpenStreetMap contributors",
         },
     },
+
+    // Measurements to outline around the house
+    sampling: {
+        offsetMeters: 1.0,        // measure 1 m outside walls
+        spacingMeters: 2.0,       // one measurement every 2 m around the shape
+        maxPoints: 80,            // limit max points requested from USGS
+        fallbackRadiusMeters: 9,  // measure a circle with this radius if no outline found
+        buildingSearchMeters: 35, // how far from dropped pin to search for a building
+    },
 };

@@ -56,3 +56,12 @@ HG.map.showZone = function (rings) {
     zoneLayer = L.polygon(latLngRings, { className: "zone-poly", interactive: false }).addTo(leafletMap);
     zoneLayer.bringToBack(); // keep pin on top
 };
+
+
+// Draw the house outline and zoom the map to fit
+HG.map.showFootprint = function (ring) {
+    if (!leafletMap) return;
+    const latLngs = ring.map(([lon, lat]) => [lat, lon]);
+    const outline = L.polygon(latLngs, { className: "footprint-poly" }).addTo(pinLayer);
+    leafletMap.fitBounds(outline.getBounds(), { padding: [60, 60], maxZoom: 19 });
+};

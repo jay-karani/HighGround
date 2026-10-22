@@ -163,3 +163,53 @@ const FEMA_NFHL_URL = "https://hazards.fema.gov/arcgis/rest/services/public/NFHL
 const FEMA_ZONES_LAYER = 28;     // flood zone shapes
 const FEMA_BFE_LINES_LAYER = 16; // lines across rivers, labeled with the flood height
 const NO_BFE = -9999;            // FEMA's code for "no flood height set here"
+
+
+// house outline and ground heights
+const MASSGIS_BUILDINGS_URL = "https://services1.arcgis.com/hGdibHYSPO59RG1h/ArcGIS/rest/services/Building_Structures/FeatureServer/0";
+
+// Ask MassGIS for buildings at pin
+// Look only for the building the pin is sitting on
+async function findBuildings(lon, lat, searchMeters) {
+  const params = pointQuery(lon, lat);
+  params.outFields = "*";
+  params.returnGeometry = true;
+  params.outSR = 4326;
+  if (searchMeters > 0) {
+    params.distance = searchMeters;
+    params.units = "esriSRUnit_Meter";
+  }
+
+  const data = await queryArcgis(`${MASSGIS_BUILDINGS_URL}/query`, params);
+  const features = data.features || [];
+  return features.filter((f) => f.geometry && f.geometry.rings);
+}
+
+// Outline of the house at the pin or null if no building is detected nearby
+async function getFootprint(lon, lat) {
+  // Checks if pin is already sitting on building
+  let buildings = await findBuildings(lon, lat, 0);
+  const pinInside = buildings.length > 0;
+
+  // Checks close by buildings if pin is not on one
+  if (!pinInside) {
+    buildings = await findBuildings(lon, lat, HG.config.sampling.buildingSearchMeters);
+  }
+  if (buildings.length === 0) return null;
+  // Pick building with closest middle point to pin
+  const projection = makeProjection(lat, lon); // the pin becomes new reference [0, 0]
+  let best = null;
+  buildings.forEach((b) => {
+    const ring = openRing(b.geometry.rings[0]);
+    const dist = distance([0, 0], projection.toXY(centroid(ring)));
+    if (best === null || dist < best.dist) {
+      best = { dist: dist, ring: ring };
+    }
+  });
+  return {
+    ring: best.ring,
+    pinInside: pinInside,
+    source: "MassGIS Building Structures",
+    note: pinInside ? "The pin is on this building." : `Nearest building, ${Math.round(best.dist)} m from the pin.`,
+  };
+}
