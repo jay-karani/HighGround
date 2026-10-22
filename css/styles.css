@@ -43,6 +43,14 @@
         margin: 12px 0 0;
         font-size: var(--fs-md);
     }
+
+    .ground-result {
+        margin: 8px 0 0;
+        font-size: var(--fs-md);
+    }
+    .ground-result:empty {
+        display: none;
+    }
 }
 
 /* 2. BASE + LAYOUT */
@@ -130,7 +138,7 @@ a { color: var(--brand-2); }
 /* Hidden on screen, still read aloud by screen readers */
 .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
 
-/* ===== 5. PHONES ===== */
+/* Phones */
 @media (max-width: 600px) {
     .hero { padding: 36px 0 28px; }
     .search { flex-direction: column; }
@@ -142,5 +150,19 @@ a { color: var(--brand-2); }
   fill: var(--accent);
   fill-opacity: 0.25;
   stroke: var(--accent);
+  stroke-width: 2.5;
+}
+
+/* Dots on map */
+.leaflet-interactive.sample {
+  fill: var(--ink-2);
+  fill-opacity: 1;
+  stroke: var(--map-line);
+  stroke-width: 1.5;
+}
+
+.leaflet-interactive.sample.is-lag {
+  fill: var(--accent);
+  stroke: var(--ink);
   stroke-width: 2.5;
 }

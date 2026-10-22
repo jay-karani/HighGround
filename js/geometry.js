@@ -74,3 +74,53 @@ function circleRing(lon, lat, radiusMeters) {
   }
   return ring;
 }
+
+// Shoelace formula. Positive = counter-clockwise, negative = clockwise
+function signedArea(ring) {
+  let total = 0;
+  for (let i = 0; i < ring.length; i++) {
+    const [x1, y1] = ring[i];
+    const [x2, y2] = ring[(i + 1) % ring.length];
+    total += x1 * y2 - x2 * y1;
+  }
+  return total / 2;
+}
+
+// Total length of all walls in meters
+function perimeter(ring) {
+  let total = 0;
+  for (let i = 0; i < ring.length; i++) {
+    total += distance(ring[i], ring[(i + 1) % ring.length]);
+  }
+  return total;
+}
+
+// Points OUTSIDE the walls, evenly spaced, in [lon, lat]
+function samplePerimeter(ringLonLat, opts) {
+  const corners = openRing(ringLonLat);
+  const [lon0, lat0] = centroid(corners);
+  const projection = makeProjection(lat0, lon0);
+  const ring = corners.map(projection.toXY);
+  if (signedArea(ring) < 0) ring.reverse();
+  const spacing = Math.max(opts.spacingMeters, perimeter(ring) / opts.maxPoints);
+  const samples = [];
+  let walked = 0;
+  for (let i = 0; i < ring.length; i++) {
+    const a = ring[i];
+    const b = ring[(i + 1) % ring.length];
+    const len = distance(a, b);
+    if (len < 0.01) continue;
+
+    const nx = (b[1] - a[1]) / len;
+    const ny = -(b[0] - a[0]) / len;
+    const n = Math.max(1, Math.round(len / spacing));
+    for (let k = 0; k < n; k++) {
+      const t = (k + 0.5) / n;
+      const x = a[0] + t * (b[0] - a[0]) + nx * opts.offsetMeters;
+      const y = a[1] + t * (b[1] - a[1]) + ny * opts.offsetMeters;
+      samples.push({ lonlat: projection.toLonLat([x, y]), along: walked + t * len, wall: i + 1 });
+    }
+    walked += len;
+  }
+    return { samples, perimeterMeters: walked, areaSqMeters: Math.abs(signedArea(ring)) };
+}

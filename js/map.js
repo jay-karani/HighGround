@@ -65,3 +65,19 @@ HG.map.showFootprint = function (ring) {
     const outline = L.polygon(latLngs, { className: "footprint-poly" }).addTo(pinLayer);
     leafletMap.fitBounds(outline.getBounds(), { padding: [60, 60], maxZoom: 19 });
 };
+
+// A dot at every measured point along the house outline, the lowest one big and gold
+HG.map.showSamples = function (samples, elevations, lagIndex) {
+    if (!leafletMap) return;
+    samples.forEach(function (s, i) {
+        const [lon, lat] = s.lonlat;
+        const height = elevations ? elevations[i] : null;
+        const isLowest = i === lagIndex;
+        const dot = L.circleMarker([lat, lon], {
+            radius: isLowest ? 7 : 4.5,
+            className: isLowest ? "sample is-lag" : "sample",
+        });
+        dot.bindTooltip(height === null ? "No data" : `${height.toFixed(1)} ft`);
+        dot.addTo(pinLayer);
+    });
+};

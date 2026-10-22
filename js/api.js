@@ -168,6 +168,8 @@ const NO_BFE = -9999;            // FEMA's code for "no flood height set here"
 // house outline and ground heights
 const MASSGIS_BUILDINGS_URL = "https://services1.arcgis.com/hGdibHYSPO59RG1h/ArcGIS/rest/services/Building_Structures/FeatureServer/0";
 
+const USGS_EPQS_URL = "https://epqs.nationalmap.gov/v1/json";
+
 // Ask MassGIS for buildings at pin
 // Look only for the building the pin is sitting on
 async function findBuildings(lon, lat, searchMeters) {
@@ -212,4 +214,60 @@ async function getFootprint(lon, lat) {
     source: "MassGIS Building Structures",
     note: pinInside ? "The pin is on this building." : `Nearest building, ${Math.round(best.dist)} m from the pin.`,
   };
+}
+
+// Ground height at a single [lon, lat] point in feet. null if USGS has no answer
+async function elevationAt([lon, lat]) {
+  const params = new URLSearchParams({ x: lon, y: lat, wkid: 4326, units: "Feet", includeDate: false });
+try {
+    const response = await fetch(`${USGS_EPQS_URL}?${params}`);
+    if (!response.ok) return null;
+    const data = await response.json();
+        const feet = parseFloat(data.value);
+    if (isNaN(feet) || feet < -1000) return null; // -1000000 means no data found
+    return feet;
+} catch (err) {
+    return null;
+  }
+}
+
+const USGS_SAMPLES_URL = "https://elevation.nationalmap.gov/arcgis/rest/services/3DEPElevation/ImageServer/getSamples";
+const FEET_PER_METER = 3.28084;
+
+// Ground heights for ALL points in ONE request. USGS answers in METERS.
+async function elevationsBatch(points) {
+  const body = new URLSearchParams({
+    geometry: JSON.stringify({ points: points, spatialReference: { wkid: 4326 } }),
+    geometryType: "esriGeometryMultipoint",
+    returnFirstValueOnly: true,
+    f: "json",
+  });
+  const response = await fetch(USGS_SAMPLES_URL, { method: "POST", body: body });
+  if (!response.ok) throw new Error(`USGS answered with error ${response.status}`);
+  const data = await response.json();
+  if (!data.samples) throw new Error("USGS sent no samples");
+    const heights = points.map(() => null);
+    data.samples.forEach((s) => {
+        const meters = parseFloat(s.value);
+        if (!isNaN(meters) && meters > -1000) {
+            heights[s.locationId] = meters * FEET_PER_METER;
+        }
+    });
+  return heights;
+}
+
+// Ground heights for multiple points, 8 at a time in the same order as backup if AIO request fails
+async function getElevations(points) {
+    try {
+        return await elevationsBatch(points);
+    } catch (err) {
+    console.warn("Fast USGS service failed, asking one point at a time instead.", err);
+    }
+    const heights = [];
+    for (let i = 0; i < points.length; i += 8) {
+        const group = points.slice(i, i + 8);
+        const answers = await Promise.all(group.map(elevationAt));
+        heights.push(...answers);
+    }
+  return heights;
 }
