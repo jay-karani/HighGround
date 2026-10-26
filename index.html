@@ -21,7 +21,7 @@
 <body>
 
     <header class="site-header">
-        <div class="wrap header row">
+        <div class="wrap header-row">
             <a class="brand" href="#check">
                 <span>HighGround</span>
             </a>
@@ -29,8 +29,8 @@
     </header>
 
     <main>
-        <section class = "hero">
-            <div class = "wrap hero-inner">
+        <section class="hero">
+            <div class="wrap hero-inner">
                 <h1>Are you paying for flood insurance you might not need?</h1>
                 <p class="lede">Government flood maps put some homes in high-risk flood zones even if the house sits above the official flood line. If that's your home, you can ask to have the map fixed for free, and your mortgage lender would no longer have to make you buy flood insurance. HighGround checks your home within seconds.</p>
                 <form id="search-form" class="search" autocomplete="off">
@@ -42,10 +42,57 @@
             </div>
         </section>
 
+        <section class="wrap steps-strip" id="steps-strip" aria-label="How HighGround works">
+            <ol>
+                <li>
+                    <strong>We find your home on the flood map</strong>
+                    <span>FEMA, the federal agency that makes flood maps, decides which homes are at-risk and how high a potential serious flood would reach.</span>
+                </li>
+                <li>
+                    <strong>We measure the ground around your house</strong>
+                    <span>We use LIDAR laser scans taken from airplanes by the U.S. Geological Survey to find the lowest ground touching your property.</span>
+                </li>
+                <li>
+                    <strong>If your house is higher, you can ask FEMA to fix the map</strong>
+                    <span>The request is called a LOMA. FEMA reviews it for free, and a land surveyor confirms the height.</span>
+                </li>
+            </ol>
+        </section>
+
+        <section class="wrap progress-wrap" id="pipeline" hidden>
+            <ol class="pipeline" id="steps">
+                <li data-step="geocode"><span class="dot"></span><div><strong>Finding your home</strong><small></small></div></li>
+                <li data-step="zone"><span class="dot"></span><div><strong>Reading the flood map</strong><small></small></div></li>
+                <li data-step="footprint"><span class="dot"></span><div><strong>Outlining the house</strong><small></small></div></li>
+                <li data-step="elevation"><span class="dot"></span><div><strong>Measuring the ground</strong><small></small></div></li>
+                <li data-step="verdict"><span class="dot"></span><div><strong>Comparing</strong><small></small></div></li>
+            </ol>
+        </section>
+
+        <section class="wrap results" id="results" hidden aria-live="polite">
+            <article class="card verdict" id="verdict">
+                <p class="v-address" id="v-address"></p>
+                <div class="verdict-head">
+                    <span class="badge" id="v-badge"></span>
+                    <h2 id="v-title"></h2>
+                </div>
+
+                <dl class="explain">
+                    <div><dt>What we found</dt><dd id="v-found"></dd></div>
+                    <div><dt>What it means for you</dt><dd id="v-meaning"></dd></div>
+                    <div><dt>What to do next</dt><dd id="v-next"></dd></div>
+                </dl>
+
+                <dl class="stats" id="v-stats"></dl>
+                <ul class="warnings" id="v-warnings"></ul>
+                <p class="fineprint">HighGround is a free screening tool, not an official decision. Only FEMA can change a flood map.</p>
+            </article>
+        </section>
+
         <section class="wrap">
             <div id="map" class="map"></div>
             <p id="zone-summary" class="zone-summary" aria-live="polite"></p>
-            <p id="ground-result" class="ground-result" aria-live="polite"></p>
+            
         </section>
     </main>
 
@@ -64,6 +111,7 @@
 <script src="js/geometry.js"></script>
 <script src="js/api.js"></script>
 <script src="js/zones.js"></script>
+<script src="js/verdict.js"></script>
 <script src="js/map.js"></script>
 <script src="js/app.js"></script>
 
