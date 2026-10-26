@@ -82,7 +82,9 @@ a { color: var(--brand-2); }
 /* Header */
 .site-header { background: var(--surface); border-bottom: 1px solid var(--line); }
 .header-row { display: flex; align-items: center; gap: 20px; height: 64px; }
-.brand { font-weight: 700; font-size: var(--fs-lg); color: var(--ink); text-decoration: none; }
+.brand { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: var(--fs-lg); color: var(--ink); text-decoration: none; }
+.brand-logo { width: 36px; height: 36px; display: block; }
+
 
 /* Hero */
 .hero { padding: 64px 0 40px; }
