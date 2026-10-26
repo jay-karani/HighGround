@@ -139,6 +139,57 @@
                 </div>
 
             </article>
+
+            <!-- The LOMA form (only shown when a map correction looks possible) -->
+            <article class="card loma" id="loma-card" hidden>
+                <h3>Next step: ask FEMA to fix the map</h3>
+                <p>The request is called a LOMA. It's free, and a land surveyor does the measuring part. Add your details and we'll make a packet with every answer for FEMA's form.</p>
+                <form id="loma-form" class="loma-form">
+                    <fieldset>
+                        <legend>About you</legend>
+                        <div class="loma-grid">
+                            <label>Your full name<input id="owner" name="owner" type="text" autocomplete="name"></label>
+                            <label>Email<input id="email" name="email" type="email" autocomplete="email"></label>
+                            <label>Phone<input id="phone" name="phone" type="tel" autocomplete="tel"></label>
+                            <label>Mailing address (if not this home)<input id="mailing" name="mailing" type="text"></label>
+                        </div>
+                    </fieldset>
+                    <fieldset>
+                        <legend>About the property</legend>
+                        <p class="q">What do you want taken off the high-risk map?</p>
+                        <div class="radio-row">
+                            <label><input type="radio" name="target" value="structure" checked> The house</label>
+                            <label><input type="radio" name="target" value="lot"> The whole lot</label>
+                        </div>
+                        <div class="loma-grid">
+                            <label>Year the house was built (if you know)<input id="year" name="year" type="text" inputmode="numeric"></label>
+                        </div>
+                        <p class="q">Has dirt been brought in to raise the ground?</p>
+                        <div class="radio-row">
+                            <label><input type="radio" name="fill" value="no" checked> No</label>
+                            <label><input type="radio" name="fill" value="yes"> Yes</label>
+                            <label><input type="radio" name="fill" value="unsure"> Not sure</label>
+                        </div>
+                        <p class="hint" id="fill-hint" hidden>If dirt was added, FEMA uses a different request called a LOMR-F. Your surveyor can tell you what to do.</p>
+                        <p class="q">From your deed (optional, you can add these later)</p>
+                        <div class="loma-grid four">
+                            <label>Lot<input id="lot" name="lot" type="text"></label>
+                            <label>Block<input id="block" name="block" type="text"></label>
+                            <label>Deed book<input id="book" name="book" type="text"></label>
+                            <label>Page<input id="page" name="page" type="text"></label>
+                        </div>
+                        <p class="hint">These are on your deed, or search your address on the registry of deeds website for your county.</p>
+                    </fieldset>
+                </form>
+                <details class="prefill">
+                    <summary>See what we filled in from public maps</summary>
+                    <dl id="prefill"></dl>
+                </details>
+                <div class="btn-row">
+                    <button type="button" class="btn btn-primary" id="packet-btn">Download my LOMA packet (PDF)</button>
+                </div>
+                <p class="muted small" id="packet-status" role="status"></p>
+            </article>
         </section>
 
     </main>
@@ -150,9 +201,11 @@
         </div>
     </footer>
 
-    <!-- Scripts: order matters -->
+<!-- Scripts: order matters -->
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
         integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+<!-- jsPDF draws the LOMA packet PDF -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
 <script src="js/config.js"></script>
 <script src="js/geometry.js"></script>
@@ -161,6 +214,8 @@
 <script src="js/verdict.js"></script>
 <script src="js/charts.js"></script>
 <script src="js/map.js"></script>
+<script src="js/report.js"></script>
+<script src="js/loma.js"></script>
 <script src="js/app.js"></script>
 
 </body>

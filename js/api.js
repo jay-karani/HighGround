@@ -122,6 +122,40 @@ async function bfeFromLines(lon, lat) {
     };
 }
 
+// Day 7: extra map details for the LOMA form
+const FEMA_PANELS_LAYER = 3;       // printed map sheets (panel number, date)
+const FEMA_COMMUNITIES_LAYER = 22; // towns (community name and ID)
+
+async function getMapInfo(lon, lat) {
+  const out = {};
+  try {
+    const params = pointQuery(lon, lat);
+    params.outFields = "FIRM_PAN,EFF_DATE";
+    const data = await queryArcgis(`${FEMA_NFHL_URL}/${FEMA_PANELS_LAYER}/query`, params);
+    const a = data.features && data.features[0] && data.features[0].attributes;
+    if (a) {
+      out.panel = a.FIRM_PAN;
+      out.effectiveDate = a.EFF_DATE ? new Date(a.EFF_DATE).toLocaleDateString() : "";
+    }
+  } catch (err) {
+    console.warn("Couldn't read FEMA's map panel", err);
+  }
+
+    try {
+    const params = pointQuery(lon, lat);
+    params.outFields = "POL_NAME1,CID";
+    const data = await queryArcgis(`${FEMA_NFHL_URL}/${FEMA_COMMUNITIES_LAYER}/query`, params);
+    const a = data.features && data.features[0] && data.features[0].attributes;
+    if (a) {
+      out.community = a.POL_NAME1;
+      out.communityId = a.CID;
+    }
+  } catch (err) {
+    console.warn("Couldn't read FEMA's community", err);
+  }
+
+  return out;
+}
 
 window.HG = window.HG || {};
 HG.live = {};
@@ -154,6 +188,10 @@ HG.live.geocode = async function (address) {
         matchedAddress: r.display_name,
         state: "MA",
         source: "OpenStreetMap Nominatim",
+        street: r.address ? [r.address.house_number, r.address.road].filter(Boolean).join(" ") : "",
+        town: r.address ? r.address.city || r.address.town || r.address.village || "" : "",
+        county: r.address ? r.address.county || "" : "",
+        zip: r.address ? r.address.postcode || "" : "",
     };
 };
 

@@ -74,7 +74,7 @@ function pickAnswer(zone, s) {
             title: "High-risk zone, but FEMA never set a flood height",
             found: "FEMA's map marks this area as high-risk, but doesn't say how high a serious flood would reach.",
             meaning: `You can still apply. FEMA works out the flood height as part of its review, and if your home is above it, ${LOMA_PAYOFF}.`,
-            next: "Bring this result to a licensed land surveyor and ask about a LOMA.",
+            next: "Fill out the form below and bring the packet to a licensed land surveyor.",
         };
     }
     if (zone.bfe == null) {
@@ -107,7 +107,7 @@ function pickAnswer(zone, s) {
             title: "Your home may be higher than the flood line",
             found,
             meaning: `That's a clear gap, so ${LOMA_PAYOFF}.`,
-            next: "Bring this result to a licensed land surveyor. They confirm the height, then you send it to FEMA.",
+            next: "Fill out the form below. A licensed land surveyor will need to confirm the height, then you can send it to FEMA.",
         };
     }
     if (diff > -LIDAR_MARGIN_FEET) {
@@ -116,7 +116,7 @@ function pickAnswer(zone, s) {
             title: "Too close to call",
             found,
             meaning: `That's within our measurement's margin of error (about ${LIDAR_MARGIN_FEET.toFixed(1)} feet). If a surveyor finds your home is above the flood height, ${LOMA_PAYOFF}.`,
-            next: "Have a licensed land surveyor measure it. Only a survey can settle a result this close.",
+            next: "Fill out the form below and have a licensed land surveyor measure it. Only a survey can settle a result this close.",
         };
     }
     return {

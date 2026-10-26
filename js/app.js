@@ -75,6 +75,48 @@ function render(r) {
     renderCharts(r);
     renderDetails(r);
     selectTab(canDraw ? "tab-ground" : "tab-map");
+
+    // The LOMA form: only when a map correction looks possible
+    document.getElementById("loma-card").hidden = !r.verdict.canApply;
+    document.getElementById("packet-status").textContent = "";
+    if (r.verdict.canApply) renderPrefill(r);
+}
+
+// Show what the packet fills in from public maps
+function renderPrefill(r) {
+  const list = document.getElementById("prefill");
+  list.innerHTML = "";   // empty it first, in case it holds an older house
+  HG.loma.answers(r, {}).sectionB.forEach(([label, value]) => {
+    if (!value) return;  // skip blank rows
+    const row = document.createElement("div");
+    const dt = document.createElement("dt");
+    const dd = document.createElement("dd");
+    dt.textContent = label;
+    dd.textContent = value;
+    row.append(dt, dd);
+    list.append(row);
+  });
+}
+
+function initLoma() {
+  const form = document.getElementById("loma-form");
+  const status = document.getElementById("packet-status");
+
+  // Show the LOMR-F hint unless "No" is picked
+  form.addEventListener("change", () => {
+    document.getElementById("fill-hint").hidden = form.elements.fill.value === "no";
+  });
+
+  document.getElementById("packet-btn").addEventListener("click", () => {
+    if (!state.result) return;
+    const values = Object.fromEntries(new FormData(form));
+    try {
+      HG.loma.download(state.result, values);
+      status.textContent = "Your packet is downloaded. Page 1 explains what to do next.";
+    } catch (err) {
+      status.textContent = "The packet couldn't be made: " + err.message;
+    }
+  });
 }
 
 // The three numbers, only when we measured the ground
@@ -171,6 +213,7 @@ async function run(address) {
         try {
             steps.set("zone", "working");
             r.zone = await getFloodZone(geo.lon, geo.lat);
+            r.mapInfo = await getMapInfo(geo.lon, geo.lat);
             steps.set("zone", "done");
             HG.map.showZone(r.zone.polygon);
             const words = describeZone(r.zone);
@@ -261,6 +304,7 @@ function showMapOnly() {
     document.getElementById("verdict").hidden = true;
     document.getElementById("tab-ground").hidden = true;
     document.getElementById("tab-tech").hidden = true;
+    document.getElementById("loma-card").hidden = true;
     selectTab("tab-map");
 }
 
@@ -378,6 +422,7 @@ function init() {
     HG.map.init("map");
     initTabs();
     showMapOnly();
+    initLoma();
  
     document.getElementById("search-form").addEventListener("submit", function (e) {
         e.preventDefault(); // stop the page from reloading
