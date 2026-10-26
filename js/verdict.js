@@ -104,7 +104,7 @@ function pickAnswer(zone, s) {
     if (diff >= LIDAR_MARGIN_FEET) {
         return {
             level: "strong", badge: "Likely yes", tone: "good", canApply: true, diff,
-            title: "Your home looks higher than the flood",
+            title: "Your home may be higher than the flood line",
             found,
             meaning: `That's a clear gap, so ${LOMA_PAYOFF}.`,
             next: "Bring this result to a licensed land surveyor. They confirm the height, then you send it to FEMA.",
@@ -121,7 +121,7 @@ function pickAnswer(zone, s) {
     }
     return {
         level: "unlikely", badge: "Likely no", tone: "bad", canApply: false, diff,
-        title: "Your home looks lower than the flood",
+        title: "Your home is likely lower than the flood line",
         found,
         meaning: "FEMA's map is probably right about this home, so a free map correction is unlikely to work.",
         next: "Ask your insurance agent about other ways to lower the cost, like raising heating equipment or adding flood vents.",
