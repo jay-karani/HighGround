@@ -65,8 +65,16 @@ function render(r) {
     renderStats(r);
     renderWarnings(r);
 
-    document.getElementById("results").hidden = false;
+    document.getElementById("verdict").hidden = false;
     card.scrollIntoView({ behavior: "smooth", block: "start" });
+
+    // Tabs under the answer
+    const canDraw = r.verdict.diff != null;
+    document.getElementById("tab-ground").hidden = !canDraw;
+    document.getElementById("tab-tech").hidden = false;
+    renderCharts(r);
+    renderDetails(r);
+    selectTab(canDraw ? "tab-ground" : "tab-map");
 }
 
 // The three numbers, only when we measured the ground
@@ -127,7 +135,7 @@ async function run(address) {
     state.busy = true;
     document.getElementById("search-btn").disabled = true;
     document.getElementById("error-card").hidden = true;
-    document.getElementById("results").hidden = true;
+    showMapOnly();
     steps.reset();
     document.getElementById("pipeline").hidden = false;
     HG.map.showZone(null);
@@ -227,9 +235,149 @@ async function run(address) {
         document.getElementById("search-btn").disabled = false;
     }
 }
+
+
+// Show one tab's panel and hide others
+function selectTab(tabId) {
+    document.querySelectorAll(".tabs button").forEach((tab) => {
+        const isThisOne = tab.id === tabId;
+        tab.setAttribute("aria-selected", isThisOne);
+        const panel = document.getElementById(tab.getAttribute("aria-controls"));
+        panel.hidden = !isThisOne;
+    });
+    // Ask to measure size of hidden maps
+    if (tabId === "tab-map") HG.map.refit();
+}
+// Make every tab button call selectTab when clicked
+function initTabs() {
+    document.querySelectorAll(".tabs button").forEach((tab) => {
+        tab.addEventListener("click", () => selectTab(tab.id));
+    });
+}
+
+// Before an answer show only the map, so people can explore
+function showMapOnly() {
+    document.getElementById("results").hidden = false;
+    document.getElementById("verdict").hidden = true;
+    document.getElementById("tab-ground").hidden = true;
+    document.getElementById("tab-tech").hidden = true;
+    selectTab("tab-map");
+}
+
+// Ground-height pictures and slider
+function renderCharts(r) {
+    if (r.verdict.diff == null) return; // no ground vs flood comparison
+
+    const bfe = r.zone.bfe;
+    const lag = r.stats.lagIndex;
+
+    const profile = HG.charts.profile(document.getElementById("profile"), {
+        samples: r.sampling.samples,
+        elevations: r.elevations,
+        bfe: bfe,
+        lagIndex: lag,
+        perimeterMeters: r.sampling.perimeterMeters,
+    });
+
+    const plan = HG.charts.sitePlan(document.getElementById("siteplan"), {
+    ring: r.footprint.ring,
+    samples: r.sampling.samples,
+    elevations: r.elevations,
+    lagIndex: lag,
+    bfe: bfe,
+    });
+
+    // Slider covers chart's whole height
+    const slider = document.getElementById("water");
+    slider.min = profile.low.toFixed(1);
+    slider.max = profile.high.toFixed(1);
+    slider.value = bfe.toFixed(1);
+
+    function update() {
+        const level = Number(slider.value);
+        profile.setWater(level);
+        plan.recolor(level);
+        HG.map.recolor(r.elevations, level, lag);
+        document.getElementById("water-out").textContent = `${level.toFixed(1)} ft`;
+
+        // Say it in words
+        const wet = r.elevations.filter((h) => h != null && h < level).length;
+        const diff = level - bfe;
+        let where = "At FEMA's flood height";
+        if (diff >= 0.05) where = `${diff.toFixed(1)} ft above FEMA's flood height`;
+        if (diff <= -0.05) where = `${(-diff).toFixed(1)} ft below FEMA's flood height`;
+        let words = `${where}, ${wet} of ${r.stats.count} points around the house would be under water.`;
+        if (wet === 0) words = `${where}, the water stays below every point around the house.`;
+        document.getElementById("water-readout").textContent = words;
+    }
+
+    slider.oninput = update;
+    document.getElementById("water-reset").onclick = function () {
+        slider.value = bfe.toFixed(1);
+        update();
+    };
+    update();
+}
  
+// Add one row to a table
+function addRow(table, cells) {
+    const row = table.insertRow();
+    cells.forEach((words) => {
+        row.insertCell().textContent = words;
+    });
+    return row;
+}
+// Fill the Details tab for one finished check
+function renderDetails(r) {
+    const z = r.zone || { zone: "No answer from FEMA", bfe: null };
+    const s = r.stats;
+    const table = document.getElementById("details");
+    table.innerHTML = "";
+
+    addRow(table, ["Matched address", r.geo.matchedAddress]);
+    addRow(table, ["Coordinates", `${r.geo.lat.toFixed(6)}, ${r.geo.lon.toFixed(6)}`]);
+    addRow(table, ["Flood zone", z.zone]);
+    addRow(table, ["Base Flood Elevation (BFE)", z.bfe != null ? `${z.bfe.toFixed(1)} ft ${z.datum}` : "None published"]);
+    addRow(table, ["Where the BFE came from", z.bfeSource || "None"]);
+    addRow(table, ["Building outline", r.footprint ? r.footprint.source : "None"]);
+
+    if (s) {
+        const spacing = HG.config.sampling.spacingMeters;
+        const offset = HG.config.sampling.offsetMeters;
+        addRow(table, ["Measurement points", `${s.count}, about ${spacing} m apart, ${offset} m outside the walls`]);
+        addRow(table, ["Lowest Adjacent Grade (LAG)", `${s.lag.toFixed(2)} ft (point ${s.lagIndex + 1})`]);
+        if (z.bfe != null) addRow(table, ["Difference (LAG minus BFE)", `${(s.lag - z.bfe).toFixed(2)} ft`]);
+        addRow(table, ["Lidar accuracy (95%)", `plus or minus ${LIDAR_MARGIN_FEET} ft`]);
+    }
+
+    // Every point, one row each
+    const box = document.getElementById("points-box");
+    const points = document.getElementById("point-table");
+    points.innerHTML = "";
+    box.hidden = !s;
+    if (!s) return;
+
+    addRow(points.createTHead(), ["#", "Wall", "Latitude", "Longitude", "Ground (ft)", "vs flood (ft)"]);
+    const body = points.createTBody();
+    r.sampling.samples.forEach((p, i) => {
+        const h = r.elevations[i];
+        const row = addRow(body, [
+            i + 1,
+            p.wall,
+            p.lonlat[1].toFixed(6),
+            p.lonlat[0].toFixed(6),
+            h == null ? "no data" : h.toFixed(2),
+            h == null || z.bfe == null ? "" : (h - z.bfe).toFixed(2),
+        ]);
+        if (i === s.lagIndex) row.className = "is-lag-row";
+    });
+}
+
+
 function init() {
     HG.map.init("map");
+    initTabs();
+    showMapOnly();
  
     document.getElementById("search-form").addEventListener("submit", function (e) {
         e.preventDefault(); // stop the page from reloading

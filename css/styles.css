@@ -1,5 +1,9 @@
 /* 1. TOKENS: The only colors, sizes, and fonts that should be used in the app. */
 :root {
+    --water-soft: rgba(44, 139, 173, 0.2);  /* see-through water */
+    --ground: #a78658;                      /* the ground line */
+    --ground-fill: #e9decc;                 /* the earth under it */
+    
     --bg: #F9FAF9;          /* very light grey-green page color */
     --surface: #FFFFFF;     /* cards and boxes main */
     --surface-2: #e5eceb;   /* boxes inside cards */
@@ -266,3 +270,94 @@ a { color: var(--brand-2); }
 .pipeline li.is-done .dot { background: var(--ok); border-color: var(--ok); }
 .pipeline li.is-skip .dot { border-style: dashed; }
 .pipeline li.is-error .dot { background: var(--bad); border-color: var(--bad); }
+
+
+/* TABS */
+.tabs {
+    display: flex;
+    gap: 4px;
+    border-bottom: 1px solid var(--line);
+    margin-bottom: 18px;
+    overflow-x: auto;
+}
+.tabs button {
+    font: inherit;
+    font-size: var(--fs-sm);
+    background: none;
+    border: 0;
+    border-bottom: 3px solid transparent;
+    padding: 10px 14px;
+    color: var(--muted);
+    cursor: pointer;
+    white-space: nowrap;
+}
+.tabs button:hover { color: var(--ink); }
+.tabs button[aria-selected="true"] {
+    color: var(--brand);
+    border-bottom-color: var(--brand);
+    font-weight: 700;
+}
+
+/* GROUND-HEIGHT PICTURES */
+.charts-row { display: grid; grid-template-columns: 2fr 1fr; gap: 20px; align-items: center; margin-top: 12px; }
+.chart, .plan { width: 100%; height: auto; display: block; }
+.plan { max-width: 300px; margin: 0 auto; }
+.chart-scroll { overflow-x: auto; }
+.chart-scroll .chart { min-width: 560px; }
+
+.grid { stroke: var(--line); }
+.tick { font: 12px var(--font); fill: var(--muted); }
+.axis-title { font: 12px var(--font); fill: var(--muted); }
+.band { fill: var(--warn); opacity: .12; }
+.water { fill: var(--water-soft); }
+.ground-fill { fill: var(--ground-fill); }
+.ground-line { fill: none; stroke: var(--ground); stroke-width: 2.2; stroke-linejoin: round; }
+.bfe-line { stroke: var(--water); stroke-width: 2; stroke-dasharray: 7 5; }
+.bfe-label { font: 700 13px var(--font); fill: var(--water); }
+.lag-label { font: 700 13px var(--font); fill: var(--ink); }
+.dot, .plan-dot { stroke: var(--surface); stroke-width: 1.2; }
+.plan-house { fill: var(--surface-2); stroke: var(--ink-2); stroke-width: 2; }
+.north { fill: var(--ink-2); }
+.scale-bar { stroke: var(--ink-2); stroke-width: 3; }
+
+.is-dry { fill: var(--ok); background: var(--ok); }
+.is-edge { fill: var(--accent); background: var(--accent); }
+.is-wet { fill: var(--bad); background: var(--bad); }
+.is-nodata { fill: var(--muted); background: var(--muted); }
+.is-lag { stroke: var(--ink); stroke-width: 2.5; }
+
+/* Colors for the dots on the Leaflet map */
+.leaflet-interactive.sample.is-dry { fill: var(--ok); }
+.leaflet-interactive.sample.is-edge { fill: var(--accent); }
+.leaflet-interactive.sample.is-wet { fill: var(--bad); }
+.leaflet-interactive.sample.is-nodata { fill: var(--muted); }
+
+/* The legend */
+.legend { list-style: none; padding: 0; margin: 14px 0 0; display: flex; flex-wrap: wrap; gap: 6px 18px; font-size: var(--fs-sm); color: var(--ink-2); }
+.sw { display: inline-block; width: 14px; height: 14px; border-radius: 50%; margin-right: 8px; vertical-align: -2px; }
+.is-lag-sw { background: transparent; box-shadow: inset 0 0 0 3px var(--ink); }
+
+/* The slider */
+.slider-row { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-top: 18px; padding-top: 16px; border-top: 1px solid var(--line); }
+.slider-row label { font-weight: 700; }
+.slider-row input { flex: 1; min-width: 160px; accent-color: var(--water); }
+.slider-row output { font-weight: 700; min-width: 70px; }
+.btn-ghost { background: transparent; color: var(--ink); border-color: var(--line); }
+.btn-ghost:hover { background: var(--surface-2); }
+.btn-sm { padding: 6px 12px; }
+
+/* DETAILS TAB */
+.kv { width: 100%; border-collapse: collapse; font-size: var(--fs-sm); }
+.kv td { text-align: left; padding: 8px 4px; border-bottom: 1px solid var(--line); vertical-align: top; }
+.kv td:first-child { width: 36%; color: var(--muted); }
+.table-scroll { max-height: 300px; overflow: auto; border: 1px solid var(--line); border-radius: var(--radius-sm); }
+#point-table { width: 100%; border-collapse: collapse; font-size: var(--fs-xs); }
+#point-table td { padding: 5px 10px; text-align: right; border-bottom: 1px solid var(--line); white-space: nowrap; }
+#point-table thead td { position: sticky; top: 0; background: var(--surface-2); font-weight: 700; }
+#point-table .is-lag-row td { background: var(--warn-soft); font-weight: 700; }
+.sources { padding-left: 1.1em; font-size: var(--fs-sm); color: var(--ink-2); }
+
+/* Stack the two pictures on phones */
+@media (max-width: 760px) {
+    .charts-row { grid-template-columns: 1fr; }
+}

@@ -28,6 +28,7 @@ HG.map.init = function (elementId) {
 HG.map.clear = function () {
     if (!leafletMap) return;
     pinLayer.clearLayers();
+    sampleMarkers = [];
 };
 
 // Put a pin at said spot, label it, and zoom in
@@ -69,7 +70,8 @@ HG.map.showFootprint = function (ring) {
 // A dot at every measured point along the house outline, the lowest one big and gold
 HG.map.showSamples = function (samples, elevations, lagIndex) {
     if (!leafletMap) return;
-    samples.forEach(function (s, i) {
+    sampleMarkers.forEach((dot) => dot.remove()); // take away the old dots
+    sampleMarkers = samples.map(function (s, i) {
         const [lon, lat] = s.lonlat;
         const height = elevations ? elevations[i] : null;
         const isLowest = i === lagIndex;
@@ -79,5 +81,30 @@ HG.map.showSamples = function (samples, elevations, lagIndex) {
         });
         dot.bindTooltip(height === null ? "No data" : `${height.toFixed(1)} ft`);
         dot.addTo(pinLayer);
+        return dot;
+    });
+};
+
+// Every dot around the house for the map to zoom to
+let sampleMarkers = [];
+
+// Hidden map means wrong size, measure again and zoom
+HG.map.refit = function () {
+    if (!leafletMap) return;
+    leafletMap.invalidateSize();
+    if (sampleMarkers.length > 0) {
+        const box = L.featureGroup(sampleMarkers).getBounds();
+        leafletMap.fitBounds(box, { padding: [40, 40], maxZoom: 19 });
+    }
+};
+
+// Recolor the dots for a flood at `level`
+HG.map.recolor = function (elevations, level, lagIndex) {
+    sampleMarkers.forEach((dot, i) => {
+        const shape = dot.getElement();
+        if (!shape) return;
+        let cls = "leaflet-interactive sample " + pointClass(elevations[i], level);
+        if (i === lagIndex) cls += " is-lag";
+        shape.setAttribute("class", cls);
     });
 };

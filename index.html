@@ -87,13 +87,60 @@
                 <ul class="warnings" id="v-warnings"></ul>
                 <p class="fineprint">HighGround is a free screening tool, not an official decision. Only FEMA can change a flood map.</p>
             </article>
+            <!-- Picture, with Map and Details -->
+            <article class="card tabs-card" id="tabs-card">
+                <div class="tabs" role="tablist" aria-label="More about this result">
+                    <button type="button" role="tab" id="tab-ground" aria-controls="panel-ground" aria-selected="true">Ground heights</button>
+                    <button type="button" role="tab" id="tab-map" aria-controls="panel-map" aria-selected="false">Map</button>
+                    <button type="button" role="tab" id="tab-tech" aria-controls="panel-tech" aria-selected="false">Details</button>
+                </div>
+                
+                <div class="tab-panel" role="tabpanel" id="panel-ground" aria-labelledby="tab-ground">
+                    <p class="muted">Each dot is a ground measurement just outside the walls. The dashed line is FEMA's flood height.</p>
+                    <div class="charts-row">
+                        <div class="chart-scroll">
+                            <svg id="profile" class="chart" role="img" aria-label="Ground height walking around the house"></svg>
+                        </div>
+                        <svg id="siteplan" class="plan" role="img" aria-label="Top-down view of the house and measurement points"></svg>
+                    </div>
+                    <ul class="legend">
+                        <li><span class="sw is-dry"></span>Above the water</li>
+                        <li><span class="sw is-edge"></span>Too close to call</li>
+                        <li><span class="sw is-wet"></span>Under the water</li>
+                        <li><span class="sw is-lag-sw"></span>Lowest point</li>
+                    </ul>
+                    <div class="slider-row">
+                        <label for="water">Try a different flood height</label>
+                        <input type="range" id="water" step="0.1">
+                        <output id="water-out" for="water"></output>
+                        <button type="button" class="btn btn-ghost btn-sm" id="water-reset">Reset</button>
+                    </div>
+                    <p class="muted small" id="water-readout"></p>
+                </div>
+
+                <div class="tab-panel" role="tabpanel" id="panel-map" aria-labelledby="tab-map" hidden>
+                    <div id="map" class="map"></div>
+                    <p id="zone-summary" class="zone-summary" aria-live="polite"></p>
+                </div>
+
+                <div class="tab-panel" role="tabpanel" id="panel-tech" aria-labelledby="tab-tech" hidden>
+                    <table class="kv" id="details"></table>
+                    <div id="points-box" hidden>
+                        <h4>Every measurement point</h4>
+                        <div class="table-scroll"><table id="point-table"></table></div>
+                    </div>
+                    <h4>Where the numbers come from</h4>
+                    <ul class="sources">
+                        <li><b>Address to map point:</b> OpenStreetMap Nominatim</li>
+                        <li><b>Flood zone and flood height:</b> FEMA National Flood Hazard Layer</li>
+                        <li><b>House outline:</b> MassGIS Building Structures</li>
+                        <li><b>Ground heights:</b> U.S. Geological Survey 3D Elevation Program (lidar, bare earth)</li>
+                    </ul>
+                </div>
+
+            </article>
         </section>
 
-        <section class="wrap">
-            <div id="map" class="map"></div>
-            <p id="zone-summary" class="zone-summary" aria-live="polite"></p>
-            
-        </section>
     </main>
 
     <footer class="site-footer">
@@ -112,6 +159,7 @@
 <script src="js/api.js"></script>
 <script src="js/zones.js"></script>
 <script src="js/verdict.js"></script>
+<script src="js/charts.js"></script>
 <script src="js/map.js"></script>
 <script src="js/app.js"></script>
 
